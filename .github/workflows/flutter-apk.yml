@@ -29,11 +29,27 @@ jobs:
       - name: Build debug APK
         run: flutter build apk --debug
 
+      - name: Collect APK from alt location
+        if: always()
+        run: |
+          if [ -f "android/app/build/outputs/apk/debug/app-debug.apk" ]; then
+            mkdir -p apk-output
+            cp android/app/build/outputs/apk/debug/app-debug.apk apk-output/
+            echo "APK found at alt location"
+          elif [ -f "build/app/outputs/flutter-apk/app-debug.apk" ]; then
+            mkdir -p apk-output
+            cp build/app/outputs/flutter-apk/app-debug.apk apk-output/
+            echo "APK found at standard location"
+          else
+            echo "Searching for APK..."
+            find . -name "*.apk" -type f
+          fi
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: leaf-app-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: apk-output/
 
   build-web:
     runs-on: ubuntu-latest
