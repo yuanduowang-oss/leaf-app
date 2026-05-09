@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "668323220823",
+    "project_id": "leaf-app-4bc6e",
+    "storage_bucket": "leaf-app-4bc6e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:668323220823:android:4475e5ab4361cb0d258212",
+        "android_client_info": {
+          "package_name": "com.leaflife.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZdTTNv4_29MMyYiJabMa8NIn5DjooOH8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
