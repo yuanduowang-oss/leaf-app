@@ -306,18 +306,19 @@ class _HomeTabState extends State<HomeTab> {
                       ),
               ),
             ),
-            Center(
-              child: Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white.withOpacity(0.8), width: 2),
+            if (post.videoUrl != null && post.videoUrl!.isNotEmpty)
+              Center(
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white.withOpacity(0.8), width: 2),
+                  ),
+                  child: const Icon(Icons.play_arrow, color: Colors.white, size: 32),
                 ),
-                child: const Icon(Icons.play_arrow, color: Colors.white, size: 32),
               ),
-            ),
             Positioned(
               left: 0,
               right: 0,
