@@ -9,7 +9,7 @@ class MockPosts {
       authorAvatar: null,
       content: '电动车充电技巧：这样充增加电池寿命🔋 1. 不要等电量耗尽再充；2. 慢充比快充更保护电池；3. 充到80%最好；4. 高温天气避免充电',
       imageUrl: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800',
-      videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      videoUrl: 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
       category: PostCategory.tips,
       evModel: '特斯拉 Model 3',
       location: '北京',
