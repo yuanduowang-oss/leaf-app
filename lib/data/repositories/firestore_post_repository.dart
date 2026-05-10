@@ -43,7 +43,7 @@ class FirestorePostRepository {
     final snapshot = await query.get();
 
     var posts = snapshot.docs.map((doc) {
-      final data = doc.data();
+      final data = doc.data() as Map<String, dynamic>;
       return Post(
         id: doc.id,
         authorId: data['authorId'] ?? '',
