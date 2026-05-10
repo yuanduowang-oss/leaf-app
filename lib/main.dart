@@ -7,6 +7,7 @@ import 'core/di/injection_container.dart';
 import 'firebase_options.dart';
 import 'features/home/presentation/pages/main_page.dart';
 import 'features/home/presentation/bloc/home_bloc.dart';
+import 'features/admin/presentation/pages/admin_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,14 +45,24 @@ class LeafApp extends StatelessWidget {
       title: '叶子',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider<HomeBloc>(
-            create: (context) => getIt<HomeBloc>(),
+      initialRoute: '/',
+      onGenerateRoute: (settings) {
+        // Web: /admin 进入管理后台
+        if (settings.name == '/admin') {
+          return MaterialPageRoute(builder: (_) => const AdminPage());
+        }
+        // Default: 主页
+        return MaterialPageRoute(
+          builder: (_) => MultiBlocProvider(
+            providers: [
+              BlocProvider<HomeBloc>(
+                create: (context) => getIt<HomeBloc>(),
+              ),
+            ],
+            child: const MainPage(),
           ),
-        ],
-        child: const MainPage(),
-      ),
+        );
+      },
     );
   }
 }
