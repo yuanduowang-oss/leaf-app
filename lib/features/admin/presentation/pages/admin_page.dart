@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_theme.dart';
-import '../../../data/repositories/firestore_post_repository.dart';
-import '../../../data/models/post.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../data/repositories/firestore_post_repository.dart';
+import '../../../../data/models/post.dart';
 
 class AdminPage extends StatefulWidget {
   const AdminPage({super.key});
