@@ -1,10 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../data/mock/mock_posts.dart';
 import '../../../../data/models/post.dart';
+import '../../../../data/repositories/firestore_post_repository.dart';
 import 'home_event.dart';
 import 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
+  final FirestorePostRepository _repository = FirestorePostRepository();
+
   HomeBloc() : super(const HomeState()) {
     on<LoadPosts>(_onLoadPosts);
     on<RefreshPosts>(_onRefreshPosts);
@@ -13,15 +16,21 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<SearchPosts>(_onSearchPosts);
   }
 
+  Future<List<Post>> _fetchPosts({PostCategory? category, String? searchQuery}) async {
+    try {
+      return await _repository.getPosts(category: category, searchQuery: searchQuery);
+    } catch (e) {
+      // Firestore 不可用时回退 mock 数据
+      return MockPosts.getPosts(category: category, searchQuery: searchQuery);
+    }
+  }
+
   void _onLoadPosts(LoadPosts event, Emitter<HomeState> emit) async {
     if (state.status == HomeStatus.loading) return;
     
     emit(state.copyWith(status: HomeStatus.loading));
     
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 500));
-    
-    final posts = MockPosts.getPosts(category: event.category);
+    final posts = await _fetchPosts(category: event.category);
     
     emit(state.copyWith(
       status: HomeStatus.loaded,
@@ -32,9 +41,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   void _onRefreshPosts(RefreshPosts event, Emitter<HomeState> emit) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    
-    final posts = MockPosts.getPosts(category: state.selectedCategory);
+    final posts = await _fetchPosts(category: state.selectedCategory);
     
     emit(state.copyWith(
       status: HomeStatus.loaded,
@@ -63,9 +70,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   void _onSearchPosts(SearchPosts event, Emitter<HomeState> emit) async {
     emit(state.copyWith(status: HomeStatus.loading));
     
-    await Future.delayed(const Duration(milliseconds: 300));
-    
-    final posts = MockPosts.getPosts(
+    final posts = await _fetchPosts(
       category: state.selectedCategory,
       searchQuery: event.query,
     );
