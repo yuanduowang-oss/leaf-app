@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 import 'home_tab.dart';
-import 'search_tab.dart';
 import 'qa_tab.dart';
 import 'profile_tab.dart';
 import '../../../charging/presentation/pages/charging_map_tab.dart';

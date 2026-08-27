@@ -6,7 +6,7 @@ import 'home_event.dart';
 import 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  final FirestorePostRepository _repository = FirestorePostRepository();
+  FirestorePostRepository? _repository;
 
   HomeBloc() : super(const HomeState()) {
     on<LoadPosts>(_onLoadPosts);
@@ -14,11 +14,17 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<LikePost>(_onLikePost);
     on<SelectCategory>(_onSelectCategory);
     on<SearchPosts>(_onSearchPosts);
+    on<LoadMorePosts>(_onLoadMorePosts);
+  }
+
+  FirestorePostRepository get _repo {
+    _repository ??= FirestorePostRepository();
+    return _repository!;
   }
 
   Future<List<Post>> _fetchPosts({PostCategory? category, String? searchQuery}) async {
     try {
-      return await _repository.getPosts(category: category, searchQuery: searchQuery);
+      return await _repo.getPosts(category: category, searchQuery: searchQuery);
     } catch (e) {
       // Firestore 不可用时回退 mock 数据
       return MockPosts.getPosts(category: category, searchQuery: searchQuery);
@@ -78,6 +84,18 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(state.copyWith(
       status: HomeStatus.loaded,
       posts: posts,
+    ));
+  }
+
+  void _onLoadMorePosts(LoadMorePosts event, Emitter<HomeState> emit) async {
+    emit(state.copyWith(status: HomeStatus.loading));
+    
+    final posts = await _fetchPosts();
+    
+    emit(state.copyWith(
+      status: HomeStatus.loaded,
+      posts: posts,
+      selectedCategory: null,
     ));
   }
 }

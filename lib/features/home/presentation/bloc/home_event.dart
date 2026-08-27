@@ -43,3 +43,7 @@ class SearchPosts extends HomeEvent {
   @override
   List<Object?> get props => [query];
 }
+
+class LoadMorePosts extends HomeEvent {
+  const LoadMorePosts();
+}

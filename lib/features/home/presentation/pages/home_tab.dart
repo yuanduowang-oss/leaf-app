@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../data/models/post.dart';
 import '../../../../features/video_player/presentation/pages/video_player_page.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
+import 'search_tab.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -16,8 +16,6 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
-  final TextEditingController _searchController = TextEditingController();
-  
   final List<String> _categories = ['推荐', '新能源', '热门', '问题解决', '保养'];
   
   final Map<String, PostCategory?> _categoryMap = {
@@ -36,7 +34,6 @@ class _HomeTabState extends State<HomeTab> {
 
   @override
   void dispose() {
-    _searchController.dispose();
     super.dispose();
   }
 
@@ -110,7 +107,9 @@ class _HomeTabState extends State<HomeTab> {
                                 ),
                               ),
                               TextButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  context.read<HomeBloc>().add(const LoadMorePosts());
+                                },
                                 child: const Text(
                                   '查看更多',
                                   style: TextStyle(color: AppTheme.primaryGreen),
@@ -170,24 +169,27 @@ class _HomeTabState extends State<HomeTab> {
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      child: TextField(
-        controller: _searchController,
-        style: const TextStyle(color: AppTheme.textPrimary),
-        decoration: InputDecoration(
-          hintText: '搜索车型、问题、技巧...',
-          hintStyle: const TextStyle(color: AppTheme.textHint),
-          prefixIcon: const Icon(Icons.search, color: AppTheme.textHint),
-          filled: true,
-          fillColor: AppTheme.surfaceDark,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        ),
-        onSubmitted: (value) {
-          context.read<HomeBloc>().add(SearchPosts(value));
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const SearchTab()),
+          );
         },
+        child: Container(
+          height: 48,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceDark,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Row(
+            children: [
+              Icon(Icons.search, color: AppTheme.textHint),
+              SizedBox(width: 8),
+              Text('搜索车型、问题、技巧...', style: TextStyle(color: AppTheme.textHint)),
+            ],
+          ),
+        ),
       ),
     );
   }

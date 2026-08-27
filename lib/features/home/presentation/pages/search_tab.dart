@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../data/models/post.dart';
+import '../../../../data/mock/mock_posts.dart';
+import '../../../../features/video_player/presentation/pages/video_player_page.dart';
 
 class SearchTab extends StatefulWidget {
   const SearchTab({super.key});
@@ -11,9 +14,9 @@ class SearchTab extends StatefulWidget {
 
 class _SearchTabState extends State<SearchTab> {
   final TextEditingController _searchController = TextEditingController();
-  final List<String> _hotSearches = ['特斯拉 AP', '充电桩安装', '冬季续航', '比亚迪汉', '蔚来ET7', '特斯拉充电', '电动车保险'];
+  final List<String> _hotSearches = ['特斯拉', '比亚迪', '充电桩', '续航', '蔚来', 'Model Y', '理想', '冬季续航'];
   final List<String> _historySearches = [];
-  List<String> _searchResults = [];
+  List<Post> _searchResults = [];
   bool _isSearching = false;
 
   @override
@@ -52,12 +55,7 @@ class _SearchTabState extends State<SearchTab> {
     if (query.trim().isEmpty) return;
     setState(() {
       _isSearching = true;
-      _searchResults = [
-        '特斯拉 Model 3 冬季续航实测',
-        '比亚迪汉 EV 充电桩安装指南',
-        '如何开启特斯拉 Autopilot',
-        '蔚来ET7 高速续航测试',
-      ].where((s) => s.contains(query)).toList();
+      _searchResults = MockPosts.getPosts(searchQuery: query.trim());
     });
     _addToHistory(query);
   }
@@ -80,6 +78,7 @@ class _SearchTabState extends State<SearchTab> {
               padding: const EdgeInsets.all(16),
               child: TextField(
                 controller: _searchController,
+                autofocus: true,
                 style: const TextStyle(color: AppTheme.textPrimary),
                 decoration: InputDecoration(
                   hintText: '搜索车型、问题、技巧...',
@@ -115,20 +114,127 @@ class _SearchTabState extends State<SearchTab> {
 
   Widget _buildSearchResults() {
     if (_searchResults.isEmpty) {
-      return const Center(child: Text('未找到相关结果', style: TextStyle(color: AppTheme.textHint)));
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.search_off, size: 56, color: AppTheme.textHint),
+            SizedBox(height: 12),
+            Text('未找到相关结果，换个关键词试试', style: TextStyle(color: AppTheme.textHint)),
+          ],
+        ),
+      );
     }
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       itemCount: _searchResults.length,
-      itemBuilder: (context, index) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(color: AppTheme.cardDark, borderRadius: BorderRadius.circular(8)),
-          child: Text(_searchResults[index], style: const TextStyle(color: AppTheme.textPrimary)),
-        );
-      },
+      itemBuilder: (context, index) => _buildResultCard(_searchResults[index]),
     );
+  }
+
+  Widget _buildResultCard(Post post) {
+    final categoryColor = _getCategoryColor(post.category);
+    return GestureDetector(
+      onTap: () => _openPost(post),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppTheme.cardDark,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: categoryColor,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    post.categoryLabel,
+                    style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                if (post.videoUrl != null)
+                  const Icon(Icons.play_circle_outline, size: 16, color: AppTheme.primaryGreen),
+                const Spacer(),
+                Text(
+                  post.authorName,
+                  style: const TextStyle(color: AppTheme.textHint, fontSize: 11),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              post.content,
+              style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13, height: 1.4),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.favorite_outline, size: 13, color: AppTheme.textHint),
+                const SizedBox(width: 4),
+                Text(_formatCount(post.likesCount), style: const TextStyle(color: AppTheme.textHint, fontSize: 11)),
+                const SizedBox(width: 12),
+                Icon(Icons.chat_bubble_outline, size: 13, color: AppTheme.textHint),
+                const SizedBox(width: 4),
+                Text(_formatCount(post.commentsCount), style: const TextStyle(color: AppTheme.textHint, fontSize: 11)),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _getCategoryColor(PostCategory category) {
+    switch (category) {
+      case PostCategory.experience:
+        return AppTheme.categoryExperience;
+      case PostCategory.tips:
+        return AppTheme.categoryTips;
+      case PostCategory.problemSolving:
+        return AppTheme.categoryProblem;
+      case PostCategory.maintenance:
+        return const Color(0xFF9C27B0);
+    }
+  }
+
+  String _formatCount(int count) {
+    if (count >= 10000) {
+      return '${(count / 10000).toStringAsFixed(1)}万';
+    } else if (count >= 1000) {
+      return '${(count / 1000).toStringAsFixed(1)}k';
+    }
+    return count.toString();
+  }
+
+  void _openPost(Post post) {
+    if (post.videoUrl != null && post.videoUrl!.isNotEmpty) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => VideoPlayerPage(
+            videoUrl: post.videoUrl!,
+            title: post.content,
+            authorName: post.authorName,
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('查看帖子: ${post.content.substring(0, post.content.length > 20 ? 20 : post.content.length)}...'),
+          backgroundColor: AppTheme.surfaceDark,
+        ),
+      );
+    }
   }
 
   Widget _buildSearchContent() {

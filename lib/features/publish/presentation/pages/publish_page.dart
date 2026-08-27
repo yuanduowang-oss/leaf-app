@@ -29,16 +29,32 @@ class _PublishPageState extends State<PublishPage> {
   }
 
   Future<void> _pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null && mounted) {
-      context.read<PublishBloc>().add(AttachImage(image.path));
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null && mounted) {
+        context.read<PublishBloc>().add(AttachImage(image.path));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('选择图片失败: $e'), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
   Future<void> _pickVideo() async {
-    final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
-    if (video != null && mounted) {
-      context.read<PublishBloc>().add(AttachVideo(video.path));
+    try {
+      final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
+      if (video != null && mounted) {
+        context.read<PublishBloc>().add(AttachVideo(video.path));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('选择视频失败: $e'), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
@@ -261,9 +277,15 @@ class _PublishPageState extends State<PublishPage> {
     );
   }
 
-  Widget _buildMediaButton(IconData icon, String label, VoidCallback onTap) {
+  Widget _buildMediaButton(IconData icon, String label, Future<void> Function() onTap) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () async {
+        try {
+          await onTap();
+        } catch (e) {
+          debugPrint('Media pick error: $e');
+        }
+      },
       child: Column(
         children: [
           Icon(icon, color: AppTheme.primaryGreen, size: 28),

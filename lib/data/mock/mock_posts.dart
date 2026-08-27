@@ -1961,7 +1961,11 @@ class MockPosts {
       posts = _posts.where((p) => p.category == category).toList();
     }
     if (searchQuery != null && searchQuery.isNotEmpty) {
-      posts = posts.where((p) => p.content.toLowerCase().contains(searchQuery.toLowerCase())).toList();
+      final q = searchQuery.toLowerCase();
+      posts = posts.where((p) =>
+        p.content.toLowerCase().contains(q) ||
+        p.authorName.toLowerCase().contains(q)
+      ).toList();
     }
     return List.unmodifiable(posts);
   }
